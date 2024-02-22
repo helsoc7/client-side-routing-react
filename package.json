@@ -35,5 +35,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "express-session": "^1.18.0",
+    "jsonwebtoken": "^9.0.2"
   }
 }

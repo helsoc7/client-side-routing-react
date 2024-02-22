@@ -7,27 +7,45 @@ function MeinBereich() {
   const [userImage, setUserImage] = useState('');
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    if (token) {
+      sessionStorage.setItem('userToken', token);
+      window.history.replaceState(null, null, window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
     // Funktion, um Nutzerdaten zu holen
     const fetchUserData = async () => {
-      const token = localStorage.getItem('userToken');
-      const response = await fetch('http://localhost:4000/userData', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (response.ok) {
+      // Token aus sessionStorage statt localStorage holen
+      const token = sessionStorage.getItem('userToken');
+      console.log(token);
+      try {
+        const response = await fetch('http://localhost:4000/userData', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Fehler beim Abrufen der Nutzerdaten');
+        }
+
+        const data = await response.json();
         setUserName(data.name);
         setUserImage(data.profileImage);
-      } else {
-        console.error('Fehler beim Abrufen der Nutzerdaten');
+      } catch (error) {
+        console.error(error);
+        // Optional: Umleiten zum Login, wenn der Token ungültig ist
+        navigate('/login');
       }
     };
 
     fetchUserData();
-  }, []); // Leeres Array, damit dieser Effekt nur einmal beim ersten Rendering läuft
+  }, [navigate]); // Abhängigkeiten hinzufügen, um Warnungen zu vermeiden
 
   return (
     <div>
